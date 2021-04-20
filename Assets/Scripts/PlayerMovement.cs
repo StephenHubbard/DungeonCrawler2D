@@ -8,6 +8,9 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private Transform movePoint;
     [SerializeField] LayerMask whatStopsMovement;
 
+
+    
+
     private void Start()
     {
         movePoint.parent = null;
@@ -29,6 +32,8 @@ public class PlayerMovement : MonoBehaviour
                 if (!Physics2D.OverlapCircle(movePoint.position + new Vector3(Input.GetAxisRaw("Horizontal"), 0f, 0f), .2f, whatStopsMovement))
                 {
                     movePoint.position += new Vector3(Input.GetAxisRaw("Horizontal"), 0f, 0f);
+                    MoveEnemies();
+
                 }
             }
             else if (Mathf.Abs(Input.GetAxisRaw("Vertical")) == 1f)
@@ -36,8 +41,22 @@ public class PlayerMovement : MonoBehaviour
                 if (!Physics2D.OverlapCircle(movePoint.position + new Vector3(0f, Input.GetAxisRaw("Vertical"), 0f), .2f, whatStopsMovement))
                 {
                     movePoint.position += new Vector3(0f, Input.GetAxisRaw("Vertical"), 0f);
+                    MoveEnemies();
                 }
             }
+
         }
     }
+
+    private void MoveEnemies()
+    {
+        var allEnemies = FindObjectsOfType<EnemyMovement>();
+
+        foreach (var enemy in allEnemies)
+        {
+            enemy.isEnemyTurn = true;
+        }
+    }
+
+    
 }
