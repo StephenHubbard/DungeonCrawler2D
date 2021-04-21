@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6642887245157956056}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: MovePoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -44,7 +44,7 @@ GameObject:
   - component: {fileID: 6642887245755771342}
   - component: {fileID: 6642887245755771343}
   - component: {fileID: 1392217385}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -80,10 +80,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 5
+  playerPower: 1
   movePoint: {fileID: 6642887245157956056}
   whatStopsMovement:
     serializedVersion: 2
     m_Bits: 256
+  enemyMask:
+    serializedVersion: 2
+    m_Bits: 1024
+  targetBorder: {fileID: 0}
+  targetEnemy: {fileID: 0}
 --- !u!114 &1392217386
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -96,9 +102,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5d5549bb68ac7349bcf727ff5a9576f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startingHearts: 3
-  currentHearts: 0
-  heartsContainer: {fileID: 0}
+  healthText: {fileID: 0}
+  currentHealth: 0
+  startingHealth: 10
 --- !u!212 &6642887245755771342
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -139,7 +145,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 1
-  m_Sprite: {fileID: 21300000, guid: 78d03ce1d36c540d5a183e4b042d3afb, type: 3}
+  m_Sprite: {fileID: 1768599190028779529, guid: 467e4b885920fb04f8c63e63164dc3c7, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -163,11 +169,11 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: -0.011847258, y: -0.003948927}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
+    oldSize: {x: 1.5, y: 1}
     newSize: {x: 0.16, y: 0.16}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -207,13 +213,13 @@ GameObject:
   m_Component:
   - component: {fileID: 6642887246052759827}
   - component: {fileID: 6642887246052759836}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Point Light 2D
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6642887246052759827
 Transform:
   m_ObjectHideFlags: 0

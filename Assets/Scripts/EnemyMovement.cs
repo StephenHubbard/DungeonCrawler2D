@@ -7,20 +7,30 @@ public class EnemyMovement : MonoBehaviour
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private Transform movePoint;
     [SerializeField] LayerMask whatStopsMovement;
+    [SerializeField] LayerMask playerMask;
     [SerializeField] private int powerLevel = 1;
+    [SerializeField] GameObject targetBorder;
 
     private PlayerMovement player;
-
-    public bool isEnemyTurn = false;
+    private TurnController turnController;
+    private Health health;
 
     [SerializeField] private float playerAggroDistance = 2.1f;
     [SerializeField] private bool isPlayerClose = false;
 
     [SerializeField] float distanceToHero;
 
+    [SerializeField] Vector2 playerPos;
+    [SerializeField] Vector2 enemyPos;
+
+    [SerializeField] public bool isEnemyTurn = false;
+
+
     private void Awake()
     {
         player = FindObjectOfType<PlayerMovement>();
+        turnController = FindObjectOfType<TurnController>();
+        health = FindObjectOfType<Health>();
     }
 
     private void Start()
@@ -30,94 +40,63 @@ public class EnemyMovement : MonoBehaviour
 
     private void Update()
     {
-        Move();
         DetectIfPlayerClose();
     }
 
-    private void Move()
+
+    public void EnemyMove()
     {
-        transform.position = Vector3.MoveTowards(transform.position, movePoint.position, moveSpeed * Time.deltaTime);
+        int randomDir = Random.Range(0, 2) * 2 - 1;
+        int randomAxis = Random.Range(0, 2) * 2 - 1;
 
-        if (isEnemyTurn)
+        if (randomAxis < 0)
         {
-            
-
-            if (isPlayerClose)
+            if (Physics2D.OverlapCircle(movePoint.position + new Vector3(randomDir, 0f, 0f), .2f, playerMask))
             {
-                Vector3 relativePos = player.transform.position - transform.position;
-
-                bool isAbove = Vector3.Dot(transform.up, relativePos) > 0.0f;    // Otherwise is below
-                bool isAtTheRight = Vector3.Dot(transform.right, relativePos) > 0.0f;    // Otherwise is at the left
-
-                print("isAbove" + isAbove);
-                print("isRight" + isAtTheRight);
-
-                if (isAbove)
-                {
-                    if (!Physics2D.OverlapCircle(movePoint.position + new Vector3(0f, 1f, 0f), .2f, whatStopsMovement))
-                    {
-                        movePoint.position += new Vector3(0f, 1f, 0f);
-                    }
-                }
-                else if (!isAbove)
-                {
-                    if (!Physics2D.OverlapCircle(movePoint.position + new Vector3(0f, -1f, 0f), .2f, whatStopsMovement))
-                    {
-                        movePoint.position += new Vector3(0f, -1f, 0f);
-                    }
-                }
-                else if(isAtTheRight)
-                {
-                    if (!Physics2D.OverlapCircle(movePoint.position + new Vector3(1f, 0f, 0f), .2f, whatStopsMovement))
-                    {
-                        movePoint.position += new Vector3(1f, 0f, 0f);
-                    }
-                }
-                else if(!isAtTheRight)
-                {
-                    if (!Physics2D.OverlapCircle(movePoint.position + new Vector3(-1f, 0f, 0f), .2f, whatStopsMovement))
-                    {
-                        movePoint.position += new Vector3(-1f, 0f, 0f);
-                    }
-                }
-
-                isEnemyTurn = false;
+                player.AssignTargetEnemy(gameObject);
+                health.TakeDamage(powerLevel);
                 return;
             }
 
-            if (Vector3.Distance(transform.position, movePoint.position) <= .05f)
+            else if (!Physics2D.OverlapCircle(movePoint.position + new Vector3(randomDir, 0f, 0f), .2f, whatStopsMovement))
             {
-                int randomDir = Random.Range(-1, 2);
-                int randomAxis = Random.Range(-1, 2);
-
-                if (randomAxis <= 0)
+                movePoint.position += new Vector3(randomDir, 0f, 0f);
+                if (player.targetEnemy == gameObject)
                 {
-                    if (!Physics2D.OverlapCircle(movePoint.position + new Vector3(randomDir, 0f, 0f), .2f, whatStopsMovement))
-                    {
-                        movePoint.position += new Vector3(randomDir, 0f, 0f);
-                    }
+                    player.AssignTargetEnemy(null);
                 }
-                else if (randomAxis > 0)
-                {
-                    if (!Physics2D.OverlapCircle(movePoint.position + new Vector3(0f, randomDir, 0f), .2f, whatStopsMovement))
-                    {
-                        movePoint.position += new Vector3(0f, randomDir, 0f);
-                    }
-                }
-
-                isEnemyTurn = false;
-
             }
         }
+        else if (randomAxis > 0)
+        {
+            if (Physics2D.OverlapCircle(movePoint.position + new Vector3(0f, randomDir, 0f), .2f, playerMask))
+            {
+                player.AssignTargetEnemy(gameObject);
+                health.TakeDamage(powerLevel);
+                return;
+            }
+
+            else if (!Physics2D.OverlapCircle(movePoint.position + new Vector3(0f, randomDir, 0f), .2f, whatStopsMovement))
+            {
+                movePoint.position += new Vector3(0f, randomDir, 0f);
+                if (player.targetEnemy == gameObject)
+                {
+                    player.AssignTargetEnemy(null);
+                }
+            }
+        }
+
+        transform.position = movePoint.position;
+        turnController.isPlayerTurn = true;
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        if (collision.gameObject.CompareTag("Player"))
-        {
-            collision.GetComponent<Health>().TakeDamage(powerLevel);
-        }
-    }
+    //private void OnTriggerEnter2D(Collider2D collision)
+    //{
+    //    if (collision.gameObject.CompareTag("Player"))
+    //    {
+    //        collision.GetComponent<Health>().TakeDamage(powerLevel);
+    //    }
+    //}
 
     private void DetectIfPlayerClose()
     {
@@ -132,5 +111,8 @@ public class EnemyMovement : MonoBehaviour
         {
             isPlayerClose = false;
         }
+
+        playerPos = player.transform.position;
+        enemyPos = transform.position;
     }
 }

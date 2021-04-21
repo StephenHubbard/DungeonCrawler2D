@@ -1,15 +1,26 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private int playerPower = 1;
     [SerializeField] private Transform movePoint;
     [SerializeField] LayerMask whatStopsMovement;
+    [SerializeField] LayerMask enemyMask;
+    [SerializeField] GameObject targetBorder;
+
+    private TurnController turnController;
+
+    [SerializeField] public GameObject targetEnemy;
 
 
-    
+    private void Awake()
+    {
+        turnController = FindObjectOfType<TurnController>();
+    }
 
     private void Start()
     {
@@ -18,7 +29,26 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
+        TargetBorderActive();
         Move();
+    }
+
+    private void TargetBorderActive()
+    {
+        if (targetEnemy != null)
+        {
+            targetBorder.SetActive(true);
+            targetBorder.transform.position = targetEnemy.transform.position;
+        }
+        else
+        {
+            targetBorder.SetActive(false);
+        }
+    }
+
+    public void AssignTargetEnemy(GameObject enemy)
+    {
+        targetEnemy = enemy;
     }
 
     private void Move()
@@ -27,36 +57,66 @@ public class PlayerMovement : MonoBehaviour
 
         if (Vector3.Distance(transform.position, movePoint.position) <= .05f)
         {
-            if (Mathf.Abs(Input.GetAxisRaw("Horizontal")) == 1f)
+            if (Mathf.Abs(Input.GetAxisRaw("Horizontal")) == 1f && turnController.isPlayerTurn)
             {
+                Collider2D[] result = new Collider2D[3];
+
+                if (Physics2D.OverlapCircle(movePoint.position + new Vector3(Input.GetAxisRaw("Horizontal"), 0f, 0f), .2f, enemyMask))
+                {
+                    Physics2D.OverlapCircle(movePoint.position + new Vector3(Input.GetAxisRaw("Horizontal"), 0f, 0f), .2f, new ContactFilter2D(), result);
+                    targetEnemy = result[0].gameObject;
+                    turnController.isPlayerTurn = false;
+                    targetEnemy.GetComponent<EnemyHealth>().TakeDamage(playerPower);
+                    StartCoroutine(MoveEnemiesCo());
+                    return;
+                }
+
                 if (!Physics2D.OverlapCircle(movePoint.position + new Vector3(Input.GetAxisRaw("Horizontal"), 0f, 0f), .2f, whatStopsMovement))
                 {
                     movePoint.position += new Vector3(Input.GetAxisRaw("Horizontal"), 0f, 0f);
-                    MoveEnemies();
-
+                    turnController.isPlayerTurn = false;
+                    targetEnemy = null;
+                    StartCoroutine(MoveEnemiesCo());
                 }
             }
-            else if (Mathf.Abs(Input.GetAxisRaw("Vertical")) == 1f)
+            else if (Mathf.Abs(Input.GetAxisRaw("Vertical")) == 1f && turnController.isPlayerTurn)
             {
+                Collider2D[] result = new Collider2D[3];
+
+                if (Physics2D.OverlapCircle(movePoint.position + new Vector3(0f, Input.GetAxisRaw("Vertical"), 0f), .2f, enemyMask))
+                {
+                    Physics2D.OverlapCircle(movePoint.position + new Vector3(0f, Input.GetAxisRaw("Vertical"), 0f), .2f, new ContactFilter2D(), result);
+                    targetEnemy = result[0].gameObject;
+                    turnController.isPlayerTurn = false;
+                    targetEnemy.GetComponent<EnemyHealth>().TakeDamage(playerPower);
+                    StartCoroutine(MoveEnemiesCo());
+                    return;
+                }
+
                 if (!Physics2D.OverlapCircle(movePoint.position + new Vector3(0f, Input.GetAxisRaw("Vertical"), 0f), .2f, whatStopsMovement))
                 {
                     movePoint.position += new Vector3(0f, Input.GetAxisRaw("Vertical"), 0f);
-                    MoveEnemies();
+                    turnController.isPlayerTurn = false;
+                    targetEnemy = null;
+                    StartCoroutine(MoveEnemiesCo());
                 }
             }
-
         }
     }
 
-    private void MoveEnemies()
+
+    public IEnumerator MoveEnemiesCo()
     {
         var allEnemies = FindObjectsOfType<EnemyMovement>();
 
+        yield return new WaitForSeconds(1f);
+
         foreach (var enemy in allEnemies)
         {
-            enemy.isEnemyTurn = true;
+            enemy.EnemyMove();
+            yield return new WaitForSeconds(.1f);
         }
     }
 
-    
+
 }
