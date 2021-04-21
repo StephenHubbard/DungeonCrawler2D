@@ -44,7 +44,7 @@ public class TurnController : MonoBehaviour
 
     public void MoveEnemiesButton()
     {
-        StartCoroutine(player.MoveEnemiesCo());
+        player.MoveEnemiesCo();
     }
 
     

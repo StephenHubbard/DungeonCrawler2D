@@ -11,6 +11,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] LayerMask whatStopsMovement;
     [SerializeField] LayerMask enemyMask;
     [SerializeField] GameObject targetBorder;
+    [SerializeField] Animator animator;
 
     private TurnController turnController;
 
@@ -66,8 +67,9 @@ public class PlayerMovement : MonoBehaviour
                     Physics2D.OverlapCircle(movePoint.position + new Vector3(Input.GetAxisRaw("Horizontal"), 0f, 0f), .2f, new ContactFilter2D(), result);
                     targetEnemy = result[0].gameObject;
                     turnController.isPlayerTurn = false;
+                    animator.SetTrigger("SwordAttack");
                     targetEnemy.GetComponent<EnemyHealth>().TakeDamage(playerPower);
-                    StartCoroutine(MoveEnemiesCo());
+                    MoveEnemiesCo();
                     return;
                 }
 
@@ -76,7 +78,7 @@ public class PlayerMovement : MonoBehaviour
                     movePoint.position += new Vector3(Input.GetAxisRaw("Horizontal"), 0f, 0f);
                     turnController.isPlayerTurn = false;
                     targetEnemy = null;
-                    StartCoroutine(MoveEnemiesCo());
+                    MoveEnemiesCo();
                 }
             }
             else if (Mathf.Abs(Input.GetAxisRaw("Vertical")) == 1f && turnController.isPlayerTurn)
@@ -88,8 +90,9 @@ public class PlayerMovement : MonoBehaviour
                     Physics2D.OverlapCircle(movePoint.position + new Vector3(0f, Input.GetAxisRaw("Vertical"), 0f), .2f, new ContactFilter2D(), result);
                     targetEnemy = result[0].gameObject;
                     turnController.isPlayerTurn = false;
+                    animator.SetTrigger("SwordAttack");
                     targetEnemy.GetComponent<EnemyHealth>().TakeDamage(playerPower);
-                    StartCoroutine(MoveEnemiesCo());
+                    MoveEnemiesCo();
                     return;
                 }
 
@@ -98,23 +101,20 @@ public class PlayerMovement : MonoBehaviour
                     movePoint.position += new Vector3(0f, Input.GetAxisRaw("Vertical"), 0f);
                     turnController.isPlayerTurn = false;
                     targetEnemy = null;
-                    StartCoroutine(MoveEnemiesCo());
+                    MoveEnemiesCo();
                 }
             }
         }
     }
 
 
-    public IEnumerator MoveEnemiesCo()
+    public void MoveEnemiesCo()
     {
         var allEnemies = FindObjectsOfType<EnemyMovement>();
-
-        yield return new WaitForSeconds(1f);
 
         foreach (var enemy in allEnemies)
         {
             enemy.EnemyMove();
-            yield return new WaitForSeconds(.1f);
         }
     }
 

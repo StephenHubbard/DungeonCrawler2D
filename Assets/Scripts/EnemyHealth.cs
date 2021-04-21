@@ -8,6 +8,7 @@ public class EnemyHealth : MonoBehaviour
     [SerializeField] private int currentHealth;
     [SerializeField] private int startingHealth = 10;
     [SerializeField] private Slider healthSlider;
+    [SerializeField] private GameObject movePoint;
 
     private void Start()
     {
@@ -30,8 +31,10 @@ public class EnemyHealth : MonoBehaviour
 
         if (currentHealth <= 0)
         {
+            Destroy(movePoint);
             Destroy(gameObject);
             FindObjectOfType<TurnController>().isPlayerTurn = true;
+            
         }
     }
 
